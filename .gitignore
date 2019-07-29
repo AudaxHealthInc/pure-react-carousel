@@ -46,9 +46,6 @@ node_modules
 # Sonar cache
 .sonar
 
-# dist folder
-/dist
-
 # Bamboo Artifacts
 eslint.json
 jest.json
