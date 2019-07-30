@@ -202,7 +202,7 @@ const Slider = class Slider extends React.Component {
     const { currentSlide } = this.props.carouselStore.getStoreState();
 
     if (typeof this.props.onDragChangeSlide === 'function' && previousSlide !== currentSlide) {
-      this.onDragChangeSlide(currentSlide);
+      this.props.onDragChangeSlide(currentSlide);
     }
 
     if (this.props.orientation === 'vertical') {
