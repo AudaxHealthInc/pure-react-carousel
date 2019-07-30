@@ -30,6 +30,7 @@ const Slider = class Slider extends React.Component {
     naturalSlideHeight: PropTypes.number.isRequired,
     naturalSlideWidth: PropTypes.number.isRequired,
     onMasterSpinner: PropTypes.func,
+    onDragChangeSlide: PropTypes.func,
     orientation: CarouselPropTypes.orientation.isRequired,
     playDirection: CarouselPropTypes.direction.isRequired,
     slideSize: PropTypes.number.isRequired,
@@ -55,6 +56,7 @@ const Slider = class Slider extends React.Component {
     dragStep: 1,
     moveThreshold: 0.1,
     onMasterSpinner: null,
+    onDragChangeSlide: null,
     spinner: null,
     style: {},
     tabIndex: null,
@@ -195,7 +197,13 @@ const Slider = class Slider extends React.Component {
   onDragEnd() {
     window.cancelAnimationFrame.call(window, this.moveTimer);
 
+    const previousSlide = this.props.carouselStore.getStoreState().currentSlide;
     this.computeCurrentSlide();
+    const { currentSlide } = this.props.carouselStore.getStoreState();
+
+    if (typeof this.props.onDragChangeSlide === 'function' && previousSlide !== currentSlide) {
+      this.onDragChangeSlide(currentSlide);
+    }
 
     if (this.props.orientation === 'vertical') {
       this.props.carouselStore.setStoreState({
