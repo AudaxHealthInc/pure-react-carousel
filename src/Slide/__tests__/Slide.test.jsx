@@ -21,11 +21,9 @@ describe('<Slide />', () => {
   it('should show an aria focus ring when focused', () => {
     const wrapper = shallow(<Slide {...props} />);
     expect(wrapper.state('focused')).toBe(false);
-    expect(wrapper.find('.focusRing').exists()).toBe(false);
     wrapper.find('.slide').simulate('focus');
     wrapper.update();
     expect(wrapper.state('focused')).toBe(true);
-    expect(wrapper.find('.focusRing').exists()).toBe(true);
   });
   it('should call any supplied onFocus when focused and pass it event data', () => {
     const onFocus = jest.fn();
@@ -38,13 +36,11 @@ describe('<Slide />', () => {
   it('should remove the aria focus ring when blur after focus', () => {
     const wrapper = shallow(<Slide {...props} />);
     expect(wrapper.state('focused')).toBe(false);
-    expect(wrapper.find('.focusRing').exists()).toBe(false);
     wrapper.find('.slide').simulate('focus');
     wrapper.update();
     wrapper.find('.slide').simulate('blur');
     wrapper.update();
     expect(wrapper.state('focused')).toBe(false);
-    expect(wrapper.find('.focusRing').exists()).toBe(false);
   });
   it('should call any supplied onBlur when blurred and pass it event data', () => {
     const onBlur = jest.fn();

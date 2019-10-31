@@ -76,11 +76,6 @@ const Slide = class Slide extends React.PureComponent {
     });
   }
 
-  renderFocusRing() {
-    if (this.state.focused) return <div className={[s.focusRing, 'carousel__slide-focus-ring'].join(' ')} />;
-    return null;
-  }
-
   render() {
     const {
       carouselStore,
@@ -158,7 +153,6 @@ const Slide = class Slide extends React.PureComponent {
           className={newInnerClassName}
         >
           {this.props.children}
-          {this.renderFocusRing()}
         </InnerTag>
       </Tag>
     );
