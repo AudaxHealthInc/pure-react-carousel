@@ -75,8 +75,8 @@ pipeline {
                 }
                 stage('Publish Version') {
                     when {
-                        expression {
-                            return env.BRANCH_NAME == 'master' && params.release ==~ /major|minor|patch/;
+                        allOf {
+                            expression { params.release != 'rally-versioning' }
                         }
                     }
                     steps {
