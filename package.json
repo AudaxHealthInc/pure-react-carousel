@@ -153,5 +153,24 @@
     "setupFiles": [
       "raf/polyfill"
     ]
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "${version}",
+      "requireCleanWorkingDir": false,
+      "requireUpstream": false,
+      "tagName": "v${version}",
+      "addUntrackedFiles": false
+    },
+    "github": {
+      "release": true,
+      "releaseName": "${version}",
+      "releaseNotes": null
+    },
+    "npm": {
+      "publish": true,
+      "publishPath": ".",
+      "tag": "latest"
+    }
   }
 }
