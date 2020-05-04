@@ -1,6 +1,6 @@
 {
   "name": "@rally/pure-react-carousel",
-  "version": "1.21.3",
+  "version": "1.21.4",
   "description": "A highly impartial suite of React components that can be assembled by the consumer to create a responsive, aria compliant, carousel with almost no limits on DOM structure or CSS styles. If you're tired of fighting some other developer's CSS and DOM structure, this carousel is for you.",
   "main": "dist/index.cjs.js",
   "module": "dist/index.es.js",
@@ -9,6 +9,9 @@
     "dist/**/*",
     "typings/**/*"
   ],
+  "publishConfig": {
+    "registry": "https://artifacts.werally.in/artifactory/api/npm/npm"
+  },
   "keywords": [
     "react",
     "carousel",
@@ -29,7 +32,8 @@
     "build:es": "NODE_ENV=production rollup -c rollup.config.es.js",
     "postbuild": "node postbuild.js",
     "build:watch": "watch 'npm run build' src",
-    "deploy": "gh-pages -d dev"
+    "deploy": "gh-pages -d dev",
+    "release": "release-it"
   },
   "typings": "typings/index.d.ts",
   "repository": {
@@ -95,7 +99,8 @@
     "rollup-plugin-uglify-es": "0.0.1",
     "rollup-watch": "^4.3.1",
     "uglify-es": "^3.3.5",
-    "watch": "^1.0.2"
+    "watch": "^1.0.2",
+    "release-it": "^13.5.8"
   },
   "peerDependencies": {
     "react": "15.x || 16.x",
@@ -148,5 +153,24 @@
     "setupFiles": [
       "raf/polyfill"
     ]
+  },
+  "release-it": {
+    "git": {
+      "commitMessage": "${version}",
+      "requireCleanWorkingDir": false,
+      "requireUpstream": false,
+      "tagName": "v${version}",
+      "addUntrackedFiles": false
+    },
+    "github": {
+      "release": true,
+      "releaseName": "${version}",
+      "releaseNotes": null
+    },
+    "npm": {
+      "publish": true,
+      "publishPath": ".",
+      "tag": "latest"
+    }
   }
 }

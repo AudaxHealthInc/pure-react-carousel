@@ -1,94 +1,96 @@
-@Library("global-pipeline-libraries") _
-
-// if we want to use specific docker image, then uncomment following line
-def nodeDockerImage = 'docker.werally.in/node:10.15.3-stretch'
-def shouldBuild = true
+@Library('global-pipeline-libraries') _
 
 pipeline {
-    agent {
-        docker {
-            image nodeDockerImage // we can specify this if we truly want a specific image
-            label 'ec2'
-        }
-    }
+    agent any
     environment {
-        // We set home to the current directory because HOME is used by npm to figure out where to put
-        // the npm cache. By default, it's set to the root of the filesystem, which the Jenkins user can't
-        // access. This means that files can't be written to the cache, and npm ci fails with permisison denied issues.
-        HOME='.'
+        npm_config_cache = 'npm-cache'
         ARTIFACTORY_CREDENTIALS = credentials('artifactory')
     }
-
     parameters {
-      booleanParam(defaultValue: true, description: 'Execute pipeline?', name: 'shouldBuild')
+        choice(name: 'release', choices: 'rally-versioning\npatch\nminor\nmajor', description: 'Type of release to make.  Use rally-versioning for a SNAPSHOT')
     }
 
     stages {
-
-        stage ("Should we build?") {
+        stage('Build, Test & Release') {
+            agent {
+                docker {
+                    image 'docker.werally.in/node:10.16.0'
+                    label "ec2"
+                    args "-u root:root -v \$HOME/.ivy2/cache:/root/.ivy2/cache"
+                    reuseNode true
+                }
+            }
+            stages {
+                stage('Set up Github') {
+                    steps {
+                        script {
+                            rally_git_setDefaultCredentials()
+                        }
+                    }
+                }
+                stage('Checkout scm') {
+                    steps {
+                        rally_git_branchCheckout()
+                    }
+                }
+                stage('Setup release variables') {
+                    steps {
+                        script {
+                            env.previousVersion = rally_git_closestTag()
+                            env.newVersion = rally_git_nextTag(params.release)
+                            env.appName = "pure-react-carousel"
+                            echo "appName: ${env.appName}"
+                            echo "previousVersion: ${env.previousVersion}"
+                            echo "newVersion: ${env.newVersion}"
+                        }
+                    }
+                }
+                stage('Artifactory credentials setup') {
+                    steps {
+                        sh 'npm config set registry https://artifacts.werally.in/artifactory/api/npm/npm'
+                        sh 'npm config set _auth $(echo -n $ARTIFACTORY_CREDENTIALS | base64)'
+                        sh 'npm config set always-auth true'
+                    }
+                }
+                stage('Install') {
+                    steps {
+                        sh 'npm ci'
+                    }
+                }
+                stage('Test') {
+                    steps {
+                        sh 'npm run test'
+                    }
+                }
+                stage('Publish Snapshot') {
+                    when {
+                        allOf {
+                            expression { params.release == 'rally-versioning' }
+                        }
+                    }
+                    steps {
+                        sh "npm version ${env.newVersion}"
+                        sh "npm publish"
+                    }
+                }
+                stage('Publish Version') {
+                    when {
+                        expression {
+                            return env.BRANCH_NAME == 'master' && params.release ==~ /major|minor|patch/;
+                        }
+                    }
+                    steps {
+                        sh "npm run release -- ${params.release} --npm.skipChecks"
+                    }
+                }
+            }
+        }
+        stage('End') {
             steps {
                 script {
-                    result = sh (script: "git log -1 | grep '.*\\[ci-skip\\].*'", returnStatus: true)
-                    if (result == 0) {
-                        echo ("'ci-skip' spotted in git commit. Aborting.")
-                        shouldBuild = false
-                    }
+                    currentBuild.description = "${env.newVersion}"
+                    echo "**** ${params.release.toUpperCase()} VERSION CREATED: ${env.newVersion} ****"
                 }
-                echo 'shouldBuild value is: '
-                echo shouldBuild.toString()
-            }
-        }
-
-        // Best to have some sort of unit test, therefore good to keep
-        stage('Test') {
-            steps {
-                sh 'npm ci'
-                sh 'npm test'
-            }
-        }
-
-        stage('Publish to Artifactory') {
-            when {
-                allOf {
-                    branch 'master'
-                    expression {
-                        return shouldBuild != false
-                    }
-                }
-            }
-
-            steps {
-                checkout scm: [
-                    $class: 'GitSCM',
-                    branches: scm.branches,
-                    extensions: [[$class: 'CloneOption', noTags: false, reference: '', shallow: false]],
-                    userRemoteConfigs: scm.userRemoteConfigs
-                ]
-                rally_git_setDefaultCredentials()
-                echo 'Publishing to Artifactory...'
-                sh """
-                    curl -u${env.ARTIFACTORY_CREDENTIALS} https://artifacts.werally.in/artifactory/api/npm/auth > .npmrc
-                    npm config set registry https://artifacts.werally.in/artifactory/api/npm/npm
-                """
-                sh '''
-                  git config user.email "jenkins@rallyhealth.com"
-                  git config user.name "jenkins"
-                  git config remote.origin.fetch '+refs/heads/*:refs/remotes/origin/*'
-                  git fetch --all
-                  git checkout master
-                  git pull
-                '''
-                sh 'npm version patch -m "Bumped to version: %s [ci-skip]"'
-                sh 'npm publish'
-                sh "git push"
-            }
-        }
-    }
-
-    post {
-        always {
-            script {
-                deleteDir()
             }
         }
     }
