@@ -37,7 +37,9 @@ pipeline {
                     steps {
                         script {
                             env.previousVersion = rally_git_closestTag()
+                            echo "previousVersion: ${env.previousVersion}"
                             env.newVersion = rally_git_nextTag(params.release)
+                            echo "newVersion: ${env.newVersion}"
                             env.appName = "pure-react-carousel"
                             echo "appName: ${env.appName}"
                             echo "previousVersion: ${env.previousVersion}"
