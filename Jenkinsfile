@@ -33,6 +33,12 @@ pipeline {
                         rally_git_branchCheckout()
                     }
                 }
+                stage('debug') {
+                    steps {
+                        sh "git describe --first-parent --tags --abbrev=0 --match v[0-9]* --always"
+                        sh "git rev-parse HEAD"
+                    }
+                }
                 stage('Setup release variables') {
                     steps {
                         script {
