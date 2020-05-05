@@ -80,6 +80,7 @@ pipeline {
                         }
                     }
                     steps {
+                        rally_git_setDefaultCredentials()
                         sh "npm run release -- ${params.release} --npm.skipChecks"
                     }
                 }
