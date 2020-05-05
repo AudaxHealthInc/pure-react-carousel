@@ -21,6 +21,11 @@ pipeline {
                 }
             }
             stages {
+                stage('clean') {
+                    steps {
+                        cleanWs()
+                    }
+                }
                 stage('Set up Github') {
                     steps {
                         script {
