@@ -35,6 +35,8 @@ pipeline {
                 }
                 stage('Debug') {
                     steps {
+                        sh "git tag -d v1.26.1-7ea33ad-SNAPSHOT"
+                        sh "git tag -d v1.26.1-4268224-SNAPSHOT"
                         sh "git tag -l v1.2*"
                     }
                 }
