@@ -28,14 +28,14 @@ pipeline {
                         }
                     }
                 }
+                stage('Clear local tags') {
+                    steps {
+                        sh 'git tag -d $(git tag -l)'
+                    }
+                }
                 stage('Checkout scm') {
                     steps {
                         rally_git_branchCheckout()
-                    }
-                }
-                stage('Debug') {
-                    steps {
-                        sh "git tag -l v1.2*"
                     }
                 }
                 stage('Setup release variables') {
@@ -76,6 +76,8 @@ pipeline {
                     steps {
                         sh "npm version ${env.newVersion}"
                         sh "npm publish"
+                        sh "echo remove snapshot tag from local git"
+                        sh "git tag -d ${env.newVersion}"
                     }
                 }
                 stage('Publish Version') {
@@ -107,11 +109,6 @@ pipeline {
                     echo "**** ${params.release.toUpperCase()} VERSION CREATED: ${env.newVersion} ****"
                 }
             }
-        }
-    }
-    post {
-        always {
-            cleanWs()
         }
     }
 }
