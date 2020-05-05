@@ -79,9 +79,18 @@ pipeline {
                             expression { params.release != 'rally-versioning' }
                         }
                     }
+                    environment {
+                        GITHUB_TOKEN = credentials('github-token')
+                    }
                     steps {
-                        rally_git_setDefaultCredentials()
-                        sh "npm run release -- ${params.release} --npm.skipChecks"
+                        withCredentials([
+                            usernamePassword(credentialsId: 'github-token', usernameVariable: 'GITHUB_USER', passwordVariable: 'GITHUB_TOKEN')
+                        ]) {
+                            script {
+                                rally_git_setDefaultCredentials()
+                                sh "npm run release -- ${params.release} --npm.skipChecks"
+                            }
+                        }
                     }
                 }
             }
