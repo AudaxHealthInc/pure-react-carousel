@@ -76,8 +76,6 @@ pipeline {
                     steps {
                         sh "npm version ${env.newVersion}"
                         sh "npm publish"
-                        sh "echo remove snapshot tag from local git"
-                        sh "git tag -d ${env.newVersion}"
                     }
                 }
                 stage('Publish Version') {
