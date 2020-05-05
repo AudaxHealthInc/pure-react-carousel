@@ -33,6 +33,11 @@ pipeline {
                         rally_git_branchCheckout()
                     }
                 }
+                stage('Debug') {
+                    steps {
+                        sh "git tag -l v1.2*"
+                    }
+                }
                 stage('Setup release variables') {
                     steps {
                         script {
