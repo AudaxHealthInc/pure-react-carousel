@@ -52,9 +52,7 @@ pipeline {
                 }
                 stage('Artifactory credentials setup') {
                     steps {
-                        sh 'npm config set registry https://artifacts.werally.in/artifactory/api/npm/npm'
-                        sh 'npm config set _auth $(echo -n $ARTIFACTORY_CREDENTIALS | base64)'
-                        sh 'npm config set always-auth true'
+                        rally_npm_setCredentials(ARTIFACTORY_CREDENTIALS)
                     }
                 }
                 stage('Install') {
