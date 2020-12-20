@@ -7,7 +7,7 @@ pipeline {
         ARTIFACTORY_CREDENTIALS = credentials('artifactory')
     }
     parameters {
-        choice(name: 'release', choices: 'rally-versioning\npatch\nminor\nmajor', description: 'Type of release to make.  Use rally-versioning for a SNAPSHOT')
+        choice(name: 'release', choices: ['', 'patch', 'minor', 'major'], description: 'Type of release to make.  Use rally-versioning for a SNAPSHOT')
     }
 
     stages {
@@ -67,8 +67,8 @@ pipeline {
                 }
                 stage('Publish Snapshot') {
                     when {
-                        allOf {
-                            expression { params.release == 'rally-versioning' }
+                        expression {
+                            return env.BRANCH_NAME !== 'master' && params.release ==~ /major|minor|patch/;
                         }
                     }
                     steps {
@@ -78,8 +78,8 @@ pipeline {
                 }
                 stage('Publish Version') {
                     when {
-                        allOf {
-                            expression { params.release != 'rally-versioning' }
+                        expression {
+                            return env.BRANCH_NAME == 'master' && params.release ==~ /major|minor|patch/;
                         }
                     }
                     environment {
