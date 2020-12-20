@@ -68,7 +68,7 @@ pipeline {
                 stage('Publish Snapshot') {
                     when {
                         expression {
-                            return env.BRANCH_NAME !== 'master' && params.release ==~ /major|minor|patch/;
+                            return env.BRANCH_NAME != 'master' && params.release ==~ /major|minor|patch/;
                         }
                     }
                     steps {
