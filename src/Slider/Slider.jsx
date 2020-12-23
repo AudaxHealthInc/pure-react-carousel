@@ -609,11 +609,11 @@ const Slider = class Slider extends React.Component {
       <div
         ref={(el) => { this.sliderElement = el; }}
         className={sliderClasses}
-        aria-live="polite"
+        // aria-live="polite"
         style={sliderStyle}
         tabIndex={newTabIndex}
         onKeyDown={this.handleOnKeyDown}
-        role="listbox"
+        // role="listbox"
         {...rest}
       >
         <div className={trayWrapClasses} style={trayWrapStyle}>
